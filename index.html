@@ -20084,7 +20084,7 @@ function nextDialog(){if(mode!=='dialog')return;if(dialogQueue.length){const [wh
 $('next').onclick=nextDialog;
 function choose(title,opts){clearOverlay();mode='choice';overlay.append(el('h2',title));const row=el('div',null,'row');overlay.append(row);opts.forEach(([t,f])=>button(t,f,row));focusFirst()}
 function focusFirst(){currentChoice=0;overlay.querySelector('button:not(:disabled)')?.focus({preventScroll:true})}
-function title(){mode='title';battle=null;s=null;$('dialog').hidden=true;clearOverlay();overlay.append(el('p','名前をよび、思いをつたえる、小さな冒険。','small'),el('h1','コトバクエスト'),el('p','― 失われた言葉 ―'));button('はじめから',()=>{if(readSave())choose('今のセーブを消して はじめますか？',[['はい',heroSelect],['いいえ',title]]);else heroSelect()});const b=button('つづきから',()=>{s=readSave();if(!s)return;clearOverlay();mode='field';history=s.recent||[];updateHUD();resumeStory()});b.disabled=!readSave();button('セーブを読みこむ',importSave);overlay.append(el('p','矢印で歩く ／ Spaceで話す・決定\n画面のボタンでも操作できます。','small'));updateHUD();focusFirst()}
+function title(){mode='title';battle=null;s=null;$('dialog').hidden=true;clearOverlay();overlay.append(el('p','名前をよび、思いをつたえる、小さな冒険。','small'),questTitleLogo(),el('p','― 失われた言葉 ―','questSubtitle'));button('はじめから',()=>{if(readSave())choose('今のセーブを消して はじめますか？',[['はい',heroSelect],['いいえ',title]]);else heroSelect()});const b=button('つづきから',()=>{s=readSave();if(!s)return;clearOverlay();mode='field';history=s.recent||[];updateHUD();resumeStory()});b.disabled=!readSave();button('セーブを読みこむ',importSave);overlay.append(el('p','矢印で歩く ／ Spaceで話す・決定\n画面のボタンでも操作できます。','small'));updateHUD();focusFirst()}
 function opening(done=heroSelect){const lines=['むかし――\nこの世界には、\nたくさんの「ことば」があった。','人は、ことばで名前をよび、\nことばで気もちをつたえ、\n文字にして、のこしていた。','しかし、ある日――','世界から\n「ことば」が\n消えはじめた。'];let i=0;function show(){clearOverlay();mode='opening';overlay.append(el('div',lines[i],'intro'));button('つぎへ',()=>{if(++i<lines.length)show();else done()});focusFirst()}show()}
 function heroSelect(){clearOverlay();mode='select';overlay.append(el('h2','あなたの 主人公を えらぼう'));const row=el('div',null,'row');overlay.append(row);['男の子①','男の子②','女の子①','女の子②'].forEach((t,i)=>{const b=button('',()=>nameInput(i),row);b.className='heroChoice';b.setAttribute('aria-label',t);const c=el('canvas',null,'portrait');c.width=c.height=32;c.getContext('2d').drawImage(images['hero'+i],32,0,32,32,0,0,32,32);b.append(c,el('span',t))});focusFirst()}
 function nameInput(hero){clearOverlay();mode='name';overlay.append(el('h2','名前を 入れてね'));const input=el('input');input.maxLength=12;input.value='ことば';input.setAttribute('aria-label','主人公の名前');overlay.append(input);button('この名前にする',()=>{const name=input.value.trim()||'ことば';choose(`「${name}」\nこの名前で いいですか？`,[['はい',()=>initialDifficulty(name,hero)],['いいえ',()=>nameInput(hero)]])});button('主人公をえらびなおす',heroSelect);input.focus()}
@@ -20524,6 +20524,31 @@ function c5TheEnd(){clearOverlay();mode='theend';const p=el('div',null,'panel');
 const c5Objective=objectiveObject;objectiveObject=function(){if(!s.flags.chapter5Started)return c5Objective();if(s.flags.worldWordsRestored){const f=s.flags,id=!f.epilogueBread?'bakery-door':!f.epilogueChild?'lost-child':!f.epilogueMedicine?'sick-elder':!f.renFatherEnding?'c5-yuu-ending':!f.minaEnding?'mina':!f.epilogueShion?'c4-house-record':!f.oldWomanEnding?'grandma':!f.epilogueVillage?'elder':'c5-last-question';return currentObjects().find(o=>o.id===id)||currentObjects().find(o=>o.id==='town-guard')}if(s.map===17)return currentObjects().find(o=>o.id==='c5-departure');if(s.map>=25&&s.map<=28)return currentObjects().find(o=>o.c5Puzzle&&!s.flags[o.c5Puzzle])||MAPS[s.map].exits[1];if(s.map===29)return currentObjects().find(o=>o.c5Event==='words'&&!s.flags['towerWord'+o.wordGroup])||currentObjects().find(o=>o.c5Event==='past');if(s.map===30)return currentObjects().find(o=>o.id==='c5-muon');return MAPS[s.map].exits.at(-1)};
 const c5Menu=menu;menu=function(){c5Menu();if(s?.flags.worldWordsRestored&&mode==='menu')button('仲間と移動する',()=>choose('みんなに会いに行こう',[['リベルタへ',()=>c5Travel(8,23,35)],['最初の村へ',()=>c5Travel(0,12,9)],['研究所跡へ',()=>c5Travel(18,8,12)],['もどる',close]]));if(s?.flags.chapter5Started&&mode==='menu'){button('冒険の記録',()=>{mode='menu';const p=newPanel();p.append(el('h2','冒険の記録'),el('p',`倒した敵：${s.defeated.length}体（現在の記録）\nレベル：${s.level} ／ 所持金：${s.g}G\n集めた武器：${s.ownedWeapons.length}種\n集めた防具：${s.ownedArmors.length}種\nプレイ時間：約${Math.floor((s.playSeconds||0)/60)}分\n${s.flags.gameClear?'本編 CLEAR':'冒険は続いている'}`));button('もどる',menu,p);focusFirst()})}};
 
+</script>
+
+<style id="questTitleDesign">
+#overlay:has(.questTitleLogo){background:radial-gradient(ellipse at 50% 34%,#18374ac9 0%,#081625eb 56%,#030915f5 100%);gap:.6em}
+.questTitleLogo{width:min(86%,760px);margin:0;line-height:0;filter:drop-shadow(0 4px 2px #01050b) drop-shadow(0 0 15px #aacae526)}
+.questTitleLogo svg{display:block;width:100%;height:auto;overflow:visible}
+#overlay .questSubtitle{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif CJK JP",serif;font-size:clamp(13px,2vw,22px);letter-spacing:.22em;color:#e5dcc1;margin:-.25em 0 .6em;text-shadow:0 2px 4px #000}
+#overlay:has(.questTitleLogo)>button{min-width:10.3em;border:1px solid #a9b9be;border-radius:3px;background:linear-gradient(100deg,#102330,#24404c,#102330);box-shadow:inset 0 0 0 3px #0b1c28,inset 0 0 0 4px #65778455,0 4px 9px #0005}
+#overlay:has(.questTitleLogo)>button:focus-visible{outline:2px solid #f7d286;outline-offset:3px}
+#overlay:has(.questTitleLogo)>.small:first-child{font-size:.65em;letter-spacing:.12em;color:#c0cdd1;margin-bottom:0}
+@media(max-height:480px){#overlay:has(.questTitleLogo){gap:.3em}.questTitleLogo{width:min(73%,650px)}#overlay .questSubtitle{margin-bottom:.2em}}
+</style>
+<script>
+function questTitleLogo(){
+ const heading=document.createElement('h1');heading.className='questTitleLogo';heading.setAttribute('aria-label','コトバクエスト');
+ heading.innerHTML=`<svg viewBox="0 0 760 176" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+ <defs><linearGradient id="questGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7d4"/><stop offset=".43" stop-color="#f4dc99"/><stop offset=".48" stop-color="#bf8d3e"/><stop offset=".6" stop-color="#f6d686"/><stop offset="1" stop-color="#b78233"/></linearGradient><linearGradient id="questEdge"><stop stop-color="#b58b46" stop-opacity="0"/><stop offset=".5" stop-color="#ecd7a0"/><stop offset="1" stop-color="#b58b46" stop-opacity="0"/></linearGradient></defs>
+ <g fill="none" stroke="#b8c9c7" stroke-width="1.4" opacity=".8"><path d="M130 46H321L340 35M420 35L439 46H630"/><path d="M200 51H309M451 51H560"/></g>
+ <g transform="translate(380 35)"><path d="M0 -29L24 0 0 29 -24 0Z" fill="#142b3b" stroke="#d2b675"/><path d="M0 -21L16 0 0 21 -16 0Z" fill="none" stroke="#829b9e" stroke-width=".8"/><path d="M-7 14V-9L-11 -12 -5 -14 0 -23 5 -14 11 -12 7 -9V14M-10 14H10M-3 14V4H3V14" fill="#cdb97d" stroke="#f3dfad" stroke-width=".7"/><path d="M-39 0H-28M28 0H39M0 -37V-31" stroke="#dfcb91"/><circle cx="0" cy="-36" r="2" fill="#fff0ba"/></g>
+ <text x="380" y="133" text-anchor="middle" font-family="Yu Mincho,Hiragino Mincho ProN,Noto Serif CJK JP,serif" font-size="77" font-weight="900" letter-spacing="1" fill="#06111d" stroke="#06111d" stroke-width="8" paint-order="stroke">コトバクエスト</text>
+ <text x="380" y="129" text-anchor="middle" font-family="Yu Mincho,Hiragino Mincho ProN,Noto Serif CJK JP,serif" font-size="77" font-weight="900" letter-spacing="1" fill="url(#questGold)" stroke="#f5e6bf" stroke-width=".7" paint-order="stroke">コトバクエスト</text>
+ <path d="M102 158H658" stroke="url(#questEdge)"/><path d="M369 158L380 153 391 158 380 163Z" fill="#d3b778"/><circle cx="92" cy="158" r="2" fill="#c9ad73"/><circle cx="668" cy="158" r="2" fill="#c9ad73"/>
+ </svg>`;
+ return heading;
+}
 </script>
 <style>
 #questOpening{position:absolute;inset:0;z-index:100;background:#030710;overflow:hidden;touch-action:manipulation}
